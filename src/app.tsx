@@ -1,21 +1,73 @@
 import React from 'react';
-import type { Settings as LayoutSettings } from '@ant-design/pro-layout';
-import { PageLoading } from '@ant-design/pro-layout';
-import { notification } from 'antd';
-import type { RequestConfig, RunTimeLayoutConfig } from 'umi';
-import { history } from 'umi';
+import type {Settings as LayoutSettings} from '@ant-design/pro-layout';
+import {PageLoading} from '@ant-design/pro-layout';
+import {notification} from 'antd';
+import type {RequestConfig, RunTimeLayoutConfig} from 'umi';
+import {history} from 'umi';
 import RightContent from '@/components/RightContent';
 import Footer from '@/components/Footer';
-import type { ResponseError } from 'umi-request';
-import { currentUser as queryCurrentUser } from './services/ant-design-pro/api';
-import { BookOutlined, LinkOutlined } from '@ant-design/icons';
+import type {ResponseError} from 'umi-request';
+import {currentUser as queryCurrentUser} from './services/ant-design-pro/api';
+import {BookOutlined, LinkOutlined} from '@ant-design/icons';
 
 const isDev = process.env.NODE_ENV === 'development';
 
 /** 获取用户信息比较慢的时候会展示一个 loading */
 export const initialStateConfig = {
-  loading: <PageLoading />,
+  loading: <PageLoading/>,
 };
+
+const userData = {
+  name: 'Serati Ma',
+  avatar: 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
+  userid: '00000001',
+  email: 'antdesign@alipay.com',
+  signature: '海纳百川，有容乃大',
+  title: '交互专家',
+  group: '蚂蚁金服－某某某事业群－某某平台部－某某技术部－UED',
+  tags: [
+    {
+      key: '0',
+      label: '很有想法的',
+    },
+    {
+      key: '1',
+      label: '专注设计',
+    },
+    {
+      key: '2',
+      label: '辣~',
+    },
+    {
+      key: '3',
+      label: '大长腿',
+    },
+    {
+      key: '4',
+      label: '川妹子',
+    },
+    {
+      key: '5',
+      label: '海纳百川',
+    },
+  ],
+  notifyCount: 12,
+  unreadCount: 11,
+  country: 'China',
+  geographic: {
+    province: {
+      label: '浙江省',
+      key: '330000',
+    },
+    city: {
+      label: '杭州市',
+      key: '330100',
+    },
+  },
+  address: '西湖区工专路 77 号',
+  phone: '0752-268888888',
+
+}
 
 /**
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
@@ -27,7 +79,7 @@ export async function getInitialState(): Promise<{
 }> {
   const fetchUserInfo = async () => {
     try {
-      const currentUser = await queryCurrentUser();
+      const currentUser = userData;
       return currentUser;
     } catch (error) {
       history.push('/user/login');
@@ -50,13 +102,13 @@ export async function getInitialState(): Promise<{
 }
 
 // https://umijs.org/zh-CN/plugins/plugin-layout
-export const layout: RunTimeLayoutConfig = ({ initialState }) => {
+export const layout: RunTimeLayoutConfig = ({initialState}) => {
   return {
-    rightContentRender: () => <RightContent />,
+    rightContentRender: () => <RightContent/>,
     disableContentMargin: false,
-    footerRender: () => <Footer />,
+    footerRender: () => <Footer/>,
     onPageChange: () => {
-      const { location } = history;
+      const {location} = history;
       // 如果没有登录，重定向到 login
       if (!initialState?.currentUser && location.pathname !== '/user/login') {
         history.push('/user/login');
@@ -64,27 +116,27 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
     },
     links: isDev
       ? [
-          <>
-            <LinkOutlined />
-            <span
-              onClick={() => {
-                window.open('/umi/plugin/openapi');
-              }}
-            >
+        <>
+          <LinkOutlined/>
+          <span
+            onClick={() => {
+              window.open('/umi/plugin/openapi');
+            }}
+          >
               openAPI 文档
             </span>
-          </>,
-          <>
-            <BookOutlined />
-            <span
-              onClick={() => {
-                window.open('/~docs');
-              }}
-            >
+        </>,
+        <>
+          <BookOutlined/>
+          <span
+            onClick={() => {
+              window.open('/~docs');
+            }}
+          >
               业务组件文档
             </span>
-          </>,
-        ]
+        </>,
+      ]
       : [],
     menuHeaderRender: undefined,
     // 自定义 403 页面
@@ -116,10 +168,10 @@ const codeMessage = {
  * @see https://beta-pro.ant.design/docs/request-cn
  */
 const errorHandler = (error: ResponseError) => {
-  const { response } = error;
+  const {response} = error;
   if (response && response.status) {
     const errorText = codeMessage[response.status] || response.statusText;
-    const { status, url } = response;
+    const {status, url} = response;
 
     notification.error({
       message: `请求错误 ${status}: ${url}`,

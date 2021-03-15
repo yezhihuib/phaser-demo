@@ -24,7 +24,7 @@
   {
     path: '/game',
     name: 'game',
-    icon: 'smile',
+    icon: 'crown',
     component: './GameMain',
   },
   {
@@ -50,7 +50,7 @@
   },
   {
     path: '/',
-    redirect: '/welcome',
+    redirect: '/game',
   },
   {
     component: './404',
