@@ -9,6 +9,8 @@ class Demo extends Scene {
     super("demo");// 继承父类 并传入名字
   }
 
+  public score = 0;
+  public scoreText: Phaser.GameObjects.Text | undefined;
   public player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody | undefined;
   public stars: Phaser.Physics.Arcade.Group | undefined;
 
@@ -23,8 +25,10 @@ class Demo extends Scene {
     );
   }
 
-  public collectStar(player, star) {
-    star.disableBody(true, true);
+  public collectStar(player: Phaser.Types.Physics.Arcade.GameObjectWithBody, star: Phaser.Types.Physics.Arcade.GameObjectWithBody) {
+    (star as Phaser.Physics.Arcade.Image).disableBody(true, true);
+    this.score += 10;
+    (this.scoreText as Phaser.GameObjects.Text).setText(`分数: ${this.score}`);
   }
 
   public create() {// 生命周期
@@ -67,12 +71,14 @@ class Demo extends Scene {
       setXY: {x: 12, y: 0, stepX: 70}
     });
 
+
     this.stars.children.iterate(function (child) {
-      child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+      (child as Phaser.Physics.Arcade.Image).setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
     });
 
     this.physics.add.collider(this.stars, platforms);
-    this.physics.add.overlap(this.player, this.stars, this.collectStar, null, this);
+    this.physics.add.overlap(this.player, this.stars, this.collectStar, undefined, this);
+    this.scoreText = this.add.text(16, 16, '分数: 0', {fontSize: '32px', fill: '#000'});
   }
 
   public update() {
@@ -95,7 +101,7 @@ class Demo extends Scene {
     }
 
     if (cursors.up.isDown && this.player.body.touching.down) {
-      this.player.setVelocityY(-330);
+      this.player.setVelocityY(-630);
     }
   }
 }
