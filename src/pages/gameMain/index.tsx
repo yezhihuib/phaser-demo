@@ -13,6 +13,7 @@ class Demo extends Scene {
   public scoreText: Phaser.GameObjects.Text | undefined;
   public player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody | undefined;
   public stars: Phaser.Physics.Arcade.Group | undefined;
+  public bombs: Phaser.Physics.Arcade.Group | undefined;
 
   public preload() { // j静态资源
     this.load.image('sky', 'https://img.alicdn.com/imgextra/i2/57145161/O1CN01HDz0gO1nzmlLuq9Ba_!!57145161.png');
@@ -29,6 +30,35 @@ class Demo extends Scene {
     (star as Phaser.Physics.Arcade.Image).disableBody(true, true);
     this.score += 10;
     (this.scoreText as Phaser.GameObjects.Text).setText(`分数: ${this.score}`);
+    if (this.stars?.countActive(true) === 0) {
+      this.stars.children.iterate(function (child) {
+        const imageChild = (child as Phaser.Physics.Arcade.Image);
+        imageChild.enableBody(true, imageChild.x, 0, true, true);
+        imageChild.setBounceY(Phaser.Math.FloatBetween(1, 1));
+        imageChild.setBounceX(Phaser.Math.FloatBetween(1, 1));
+        imageChild.setVelocity(Phaser.Math.Between(-200, 200), 20);
+        imageChild.setCollideWorldBounds(true);
+
+      });
+
+      var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+
+      var bomb = this.bombs.create(x, 16, 'bomb');
+      bomb.setBounce(1);
+      bomb.setCollideWorldBounds(true);
+      bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+
+    }
+  }
+
+  public hitBomb(player: Phaser.Types.Physics.Arcade.GameObjectWithBody, bomb: Phaser.Types.Physics.Arcade.GameObjectWithBody) {
+    this.physics.pause();
+
+    player.setTint(0xff0000);
+
+    player.anims.play('turn');
+
+    //gameOver = true;
   }
 
   public create() {// 生命周期
@@ -73,12 +103,20 @@ class Demo extends Scene {
 
 
     this.stars.children.iterate(function (child) {
-      (child as Phaser.Physics.Arcade.Image).setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+      const imageChild = (child as Phaser.Physics.Arcade.Image);
+      imageChild.setBounceY(Phaser.Math.FloatBetween(1, 1));
+      imageChild.setBounceX(Phaser.Math.FloatBetween(1, 1));
+      imageChild.setVelocity(Phaser.Math.Between(-200, 200), 20);
+      imageChild.setCollideWorldBounds(true);
     });
 
     this.physics.add.collider(this.stars, platforms);
     this.physics.add.overlap(this.player, this.stars, this.collectStar, undefined, this);
     this.scoreText = this.add.text(16, 16, '分数: 0', {fontSize: '32px', fill: '#000'});
+
+    this.bombs = this.physics.add.group();
+    this.physics.add.collider(this.bombs, platforms);
+    this.physics.add.collider(this.player, this.bombs, this.hitBomb, undefined, this);
   }
 
   public update() {
@@ -101,7 +139,7 @@ class Demo extends Scene {
     }
 
     if (cursors.up.isDown && this.player.body.touching.down) {
-      this.player.setVelocityY(-630);
+      this.player.setVelocityY(-330);
     }
   }
 }
@@ -126,7 +164,8 @@ export const GameMain = (): React.ReactNode => {
 
   useEffect(() => {
     window.game = new Game(config);
-  }, [])
+    return () => window.game.destroy(false, false);
+  }, []);
 
   const intl = useIntl();
   return (
