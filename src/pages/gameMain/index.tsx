@@ -41,9 +41,9 @@ class Demo extends Scene {
 
       });
 
-      var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+      const x = (player.body.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
 
-      var bomb = this.bombs.create(x, 16, 'bomb');
+      const bomb = this.bombs?.create(x, 16, 'bomb');
       bomb.setBounce(1);
       bomb.setCollideWorldBounds(true);
       bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
@@ -53,10 +53,9 @@ class Demo extends Scene {
 
   public hitBomb(player: Phaser.Types.Physics.Arcade.GameObjectWithBody, bomb: Phaser.Types.Physics.Arcade.GameObjectWithBody) {
     this.physics.pause();
-
-    player.setTint(0xff0000);
-
-    player.anims.play('turn');
+    const playerSprite = (player as Phaser.GameObjects.Sprite);
+    playerSprite.setTint(0xff0000);
+    playerSprite.anims.play('turn');
 
     //gameOver = true;
   }
@@ -162,8 +161,11 @@ const config: Phaser.Types.Core.GameConfig = {
 
 export const GameMain = (): React.ReactNode => {
 
+
   useEffect(() => {
+    // @ts-ignore
     window.game = new Game(config);
+    // @ts-ignore
     return () => window.game.destroy(false, false);
   }, []);
 
