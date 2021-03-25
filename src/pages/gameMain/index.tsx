@@ -4,22 +4,26 @@ import {useIntl} from "umi";
 import {Card} from "antd";
 import {AUTO, Game, Scene} from "phaser";
 import ScoreLabel from "@/pages/gameMain/ui/scoreLabel";
-
-const GROUND_KEY = "ground";
-const DUDE_KEY = "dude";
-const STAR_KEY = "star";
-
+import BombGenerator from "@/pages/gameMain/ui/bombGenerator";
+import {DUDE_KEY, GAME_HEIGHT, GAME_WIDTH, GROUND_KEY, STAR_KEY} from "@/pages/gameMain/constant/constant";
+import StarGenerator from "@/pages/gameMain/ui/starGenerator";
 
 class Demo extends Scene {
-  constructor() {
+  width: number;
+  height: number;
+  player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  starGenerator?: StarGenerator;
+  bombGenerator?: BombGenerator;
+  cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
+  scoreLabel?: ScoreLabel;
+  gameOver?: boolean;
+
+  constructor(width: number, height: number) {
     super("demo");// 继承父类 并传入名字
+    this.width = width;
+    this.height = height;
   }
 
-  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody | undefined;
-  stars: Phaser.Physics.Arcade.Group | undefined;
-  bombs: Phaser.Physics.Arcade.Group | undefined;
-  cursors: Phaser.Types.Input.Keyboard.CursorKeys | undefined;
-  scoreLabel: ScoreLabel | undefined;
 
   public preload() { // j静态资源
     this.load.image('sky', 'https://img.alicdn.com/imgextra/i2/57145161/O1CN01HDz0gO1nzmlLuq9Ba_!!57145161.png');
@@ -33,26 +37,13 @@ class Demo extends Scene {
   }
 
   public collectStar(player: Phaser.Types.Physics.Arcade.GameObjectWithBody, star: Phaser.Types.Physics.Arcade.GameObjectWithBody) {
+    const physicsPlayer = player as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
     (star as Phaser.Physics.Arcade.Image).disableBody(true, true);
     this.scoreLabel?.addScore(10);
-    if (this.stars?.countActive(true) === 0) {
-      this.stars.children.iterate(function (child) {
-        const imageChild = (child as Phaser.Physics.Arcade.Image);
-        imageChild.enableBody(true, imageChild.x, 0, true, true);
-        imageChild.setBounceY(Phaser.Math.FloatBetween(1, 1));
-        imageChild.setBounceX(Phaser.Math.FloatBetween(1, 1));
-        imageChild.setVelocity(Phaser.Math.Between(-200, 200), 20);
-        imageChild.setCollideWorldBounds(true);
-
-      });
-
-      const x = (player.body.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
-
-      const bomb = this.bombs?.create(x, 16, 'bomb');
-      bomb.setBounce(1);
-      bomb.setCollideWorldBounds(true);
-      bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
-
+    const stars = this.starGenerator?.getGroup();
+    if (stars?.countActive(true) === 0) {
+      this.starGenerator?.generate(Phaser.Math.Between(3, 9));
+      this.bombGenerator?.generate(physicsPlayer);
     }
   }
 
@@ -102,21 +93,6 @@ class Demo extends Scene {
     return player;
   }
 
-  createStars() {
-    const stars = this.physics.add.group({
-      key: STAR_KEY,
-      repeat: 11,
-      setXY: {x: 12, y: 0, stepX: 70}
-    });
-    stars.children.iterate(function (child) {
-      const imageChild = (child as Phaser.Physics.Arcade.Image);
-      imageChild.setBounceY(Phaser.Math.FloatBetween(1, 1));
-      imageChild.setBounceX(Phaser.Math.FloatBetween(1, 1));
-      imageChild.setVelocity(Phaser.Math.Between(-200, 200), 20);
-      imageChild.setCollideWorldBounds(true);
-    });
-    return stars;
-  }
 
   createScoreLabel(x: number, y: number, score: number) {
     const style: Phaser.Types.GameObjects.Text.TextStyle = {fontSize: '32px', color: '#000'}
@@ -130,17 +106,19 @@ class Demo extends Scene {
     const platforms = this.createPlatforms();
     const player = this.createPlayer();
     this.player = player;
-    const stars = this.createStars();
-    this.stars = stars;
+    this.starGenerator = new StarGenerator(this);
+    this.starGenerator.generate(11);
+    const stars = this.starGenerator.getGroup();
+
     this.scoreLabel = this.createScoreLabel(16, 16, 0);
+    this.bombGenerator = new BombGenerator(this);
+    const bombs = this.bombGenerator.getGroup();
 
     this.physics.add.collider(player, platforms);
     this.physics.add.collider(stars, platforms);
+    this.physics.add.collider(bombs, platforms);
     this.physics.add.overlap(player, stars, this.collectStar, undefined, this);
-
-    this.bombs = this.physics.add.group();
-    this.physics.add.collider(this.bombs, platforms);
-    this.physics.add.collider(this.player, this.bombs, this.hitBomb, undefined, this);
+    this.physics.add.collider(this.player, bombs, this.hitBomb, undefined, this);
 
     this.cursors = this.input.keyboard.createCursorKeys()
   }
@@ -150,6 +128,9 @@ class Demo extends Scene {
       return;
     }
     if (!this.cursors) {
+      return;
+    }
+    if (this.gameOver) {
       return;
     }
     if (this.cursors.left.isDown) {
@@ -170,8 +151,8 @@ class Demo extends Scene {
 
 const config: Phaser.Types.Core.GameConfig = {
   type: AUTO,
-  width: 800,
-  height: 600,
+  width: GAME_WIDTH,
+  height: GAME_HEIGHT,
   parent: "gamemain",
   physics: {
     default: "arcade",
@@ -194,7 +175,7 @@ export const GameMain = (): React.ReactNode => {
     return () => window.game.destroy(false, false);
   }, []);
 
-  const intl = useIntl();
+  // const intl = useIntl();
   return (
     <PageContainer>
       <Card>
