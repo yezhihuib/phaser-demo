@@ -1,4 +1,4 @@
-import {BOMB_KEY} from "@/pages/gameMain/constant/constant";
+import {BOMB_KEY, GAME_WIDTH} from "@/pages/gameMain/constant/constant";
 
 class BombGenerator {
 
@@ -15,13 +15,21 @@ class BombGenerator {
     return this.group;
   }
 
-  generate(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
-    const x = (player.body.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
-    const bomb = this.group?.create(x, 16, BOMB_KEY);
-    bomb.setBounce(1);
-    bomb.setCollideWorldBounds(true);
-    bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
-    return bomb;
+  generateBombs(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, num: number) {
+    const stepX = parseInt((`${(GAME_WIDTH - 12 * 2) / num}`), 10);
+    const bombs = this.group?.createFromConfig({
+      key: BOMB_KEY,
+      repeat: num,
+      setXY: {x: 0, y: 0, stepX}
+    });
+    bombs?.forEach((bomb) => {
+      const randX = (player.body.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+      bomb.setX(randX)
+      bomb.setBounce(1);
+      bomb.setCollideWorldBounds(true);
+      bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+    });
+    return bombs;
   }
 }
 

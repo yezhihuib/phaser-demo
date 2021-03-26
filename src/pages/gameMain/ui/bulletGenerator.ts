@@ -4,11 +4,9 @@ class BulletGenerator {
 
   private scene: Phaser.Scene;
   private group: Phaser.Physics.Arcade.Group;
-  private player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 
-  constructor(scene: Phaser.Scene, player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
+  constructor(scene: Phaser.Scene) {
     this.scene = scene;
-    this.player = player;
     this.group = this.scene.physics.add.group();
   }
 
@@ -16,12 +14,21 @@ class BulletGenerator {
     return this.group;
   }
 
-  public createBullet() {
-    const bullet = this.group.create(this.player.x, this.player.y - 24, BULLET_KEY);
-    bullet.setVelocityY(-600);
-    bullet.setVelocityX(0);
-    bullet.setGravityY(DEFAULT_GRAVITY * -1);
-    return bullet;
+  public createBullets(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, num: number) {
+    const bulletNumber = num % 2 === 0 ? num + 1 : num;
+    const bullets = this.group.createMultiple({
+      key: BULLET_KEY,
+      quantity: bulletNumber,
+      setXY: {x: player.x, y: player.y - 12}
+    });
+    const step = -20;
+    const baseVelocity = -1 * step * (bulletNumber - 1) / 2;
+    bullets.forEach((bullet, index) => {
+      bullet.setVelocityY(-600);
+      bullet.setVelocityX(baseVelocity + index * step);
+      bullet.setGravityY(DEFAULT_GRAVITY * -1);
+    });
+    return bullets;
   }
 }
 

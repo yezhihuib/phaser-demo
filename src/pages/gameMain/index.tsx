@@ -54,17 +54,22 @@ class Demo extends Scene {
     const stars = this.starGenerator?.getGroup();
     if (stars?.countActive(true) === 0) {
       this.starGenerator?.generate(Phaser.Math.Between(3, 9));
-      this.bombGenerator?.generate(physicsPlayer);
+      this.bombGenerator?.generateBombs(physicsPlayer, Phaser.Math.Between(1, 4));
     }
   }
 
-  public hitBomb(player: Phaser.Types.Physics.Arcade.GameObjectWithBody, bomb: Phaser.Types.Physics.Arcade.GameObjectWithBody) {
+  public playerHitBomb(player: Phaser.Types.Physics.Arcade.GameObjectWithBody, bomb: Phaser.Types.Physics.Arcade.GameObjectWithBody) {
     this.physics.pause();
     const playerSprite = (player as Phaser.GameObjects.Sprite);
     playerSprite.setTint(0xff0000);
     playerSprite.anims.play('turn');
 
     this.gameOver = true;
+  }
+
+  public bulletHitBomb(bullet: Phaser.Types.Physics.Arcade.GameObjectWithBody, bomb: Phaser.Types.Physics.Arcade.GameObjectWithBody) {
+    (bullet as Phaser.Physics.Arcade.Image).disableBody(true, true);
+    (bomb as Phaser.Physics.Arcade.Image).disableBody(true, true);
   }
 
   createPlatforms() {
@@ -96,17 +101,19 @@ class Demo extends Scene {
     this.bombGenerator = new BombGenerator(this);
     const bombs = this.bombGenerator.getGroup();
 
-    this.bulletGenerator = new BulletGenerator(this, player);
+    this.bulletGenerator = new BulletGenerator(this);
+    const bullets = this.bulletGenerator.getGroup();
 
     this.physics.add.collider(player, platforms);
     this.physics.add.collider(stars, platforms);
     this.physics.add.collider(bombs, platforms);
     this.physics.add.overlap(player, stars, this.collectStar, undefined, this);
-    this.physics.add.collider(player, bombs, this.hitBomb, undefined, this);
+    this.physics.add.collider(player, bombs, this.playerHitBomb, undefined, this);
+    this.physics.add.collider(bullets, bombs, this.bulletHitBomb, undefined, this);
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.cursors.space.onDown = () => {
-      this.bulletGenerator?.createBullet();
+      this.bulletGenerator?.createBullets(player, 5);
     }
   }
 
