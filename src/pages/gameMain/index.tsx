@@ -1,17 +1,17 @@
 import React, {useEffect} from "react";
 import {PageContainer} from "@ant-design/pro-layout";
-import {useIntl} from "umi";
 import {Card} from "antd";
 import {AUTO, Game, Scene} from "phaser";
 import ScoreLabel from "@/pages/gameMain/ui/scoreLabel";
 import BombGenerator from "@/pages/gameMain/ui/bombGenerator";
-import {DUDE_KEY, GAME_HEIGHT, GAME_WIDTH, GROUND_KEY, STAR_KEY} from "@/pages/gameMain/constant/constant";
+import {GAME_HEIGHT, GAME_WIDTH, GROUND_KEY, STAR_KEY} from "@/pages/gameMain/constant/constant";
 import StarGenerator from "@/pages/gameMain/ui/starGenerator";
+import PlayerGenerator from "@/pages/gameMain/ui/playerGenerator";
 
 class Demo extends Scene {
   width: number;
   height: number;
-  player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  playerGenerator?: PlayerGenerator;
   starGenerator?: StarGenerator;
   bombGenerator?: BombGenerator;
   cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -65,35 +65,6 @@ class Demo extends Scene {
     return platforms;
   }
 
-  createPlayer() {
-    const player = this.physics.add.sprite(100, 450, DUDE_KEY);
-    player.setBounce(0.2);
-    player.setCollideWorldBounds(true);
-
-    this.anims.create({
-      key: 'left',
-      frames: this.anims.generateFrameNumbers(DUDE_KEY, {start: 0, end: 3}),
-      frameRate: 10,
-      repeat: -1
-    });
-
-    this.anims.create({
-      key: 'turn',
-      frames: [{key: DUDE_KEY, frame: 4}],
-      frameRate: 20
-    });
-
-    this.anims.create({
-      key: 'right',
-      frames: this.anims.generateFrameNumbers(DUDE_KEY, {start: 5, end: 8}),
-      frameRate: 10,
-      repeat: -1
-    });
-
-    return player;
-  }
-
-
   createScoreLabel(x: number, y: number, score: number) {
     const style: Phaser.Types.GameObjects.Text.TextStyle = {fontSize: '32px', color: '#000'}
     const label = new ScoreLabel(this, x, y, score, style);
@@ -104,8 +75,8 @@ class Demo extends Scene {
   public create() {// 生命周期
     this.add.image(0, 0, 'sky').setOrigin(0, 0);
     const platforms = this.createPlatforms();
-    const player = this.createPlayer();
-    this.player = player;
+    this.playerGenerator = new PlayerGenerator(this);
+    const player = this.playerGenerator.getPlayer();
     this.starGenerator = new StarGenerator(this);
     this.starGenerator.generate(11);
     const stars = this.starGenerator.getGroup();
@@ -118,13 +89,14 @@ class Demo extends Scene {
     this.physics.add.collider(stars, platforms);
     this.physics.add.collider(bombs, platforms);
     this.physics.add.overlap(player, stars, this.collectStar, undefined, this);
-    this.physics.add.collider(this.player, bombs, this.hitBomb, undefined, this);
+    this.physics.add.collider(player, bombs, this.hitBomb, undefined, this);
 
     this.cursors = this.input.keyboard.createCursorKeys()
   }
 
   public update() {
-    if (!this.player) {
+    const player = this.playerGenerator?.getPlayer();
+    if (!player) {
       return;
     }
     if (!this.cursors) {
@@ -134,17 +106,17 @@ class Demo extends Scene {
       return;
     }
     if (this.cursors.left.isDown) {
-      this.player.setVelocityX(-160);
-      this.player.anims.play('left', true);
+      player.setVelocityX(-160);
+      player.anims.play('left', true);
     } else if (this.cursors.right.isDown) {
-      this.player.setVelocityX(160);
-      this.player.anims.play('right', true);
+      player.setVelocityX(160);
+      player.anims.play('right', true);
     } else {
-      this.player.setVelocityX(0);
-      this.player.anims.play('turn');
+      player.setVelocityX(0);
+      player.anims.play('turn');
     }
-    if (this.cursors.up.isDown && this.player.body.touching.down) {
-      this.player.setVelocityY(-330);
+    if (this.cursors.up.isDown && player.body.touching.down) {
+      player.setVelocityY(-330);
     }
   }
 }
