@@ -1,4 +1,4 @@
-import {DUDE_KEY} from "@/pages/gameMain/constant/constant";
+import {DEFAULT_GRAVITY, DUDE_KEY} from "@/pages/gameMain/constant/constant";
 
 class PlayerGenerator {
   private scene: Phaser.Scene;
@@ -37,6 +37,28 @@ class PlayerGenerator {
 
   public getPlayer() {
     return this.player;
+  }
+
+  onKeyInput(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
+    const {player} = this;
+    if (cursors.left.isDown) {
+      player.setVelocityX(-200);
+      player.anims.play('left', true);
+    } else if (cursors.right.isDown) {
+      player.setVelocityX(200);
+      player.anims.play('right', true);
+    } else {
+      player.setVelocityX(0);
+      player.anims.play('turn');
+    }
+    if (cursors.up.isDown && player.body.touching.down) {
+      player.setVelocityY(-360);
+    }
+    if (cursors.down.isDown) {
+      player.setGravity(DEFAULT_GRAVITY * 2);
+    } else {
+      player.setGravity(0);
+    }
   }
 
 }

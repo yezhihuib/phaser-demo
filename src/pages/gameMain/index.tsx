@@ -72,7 +72,7 @@ class Demo extends Scene {
     (bomb as Phaser.Physics.Arcade.Image).disableBody(true, true);
   }
 
-  public bulletHitPlatform(bullet: Phaser.Types.Physics.Arcade.GameObjectWithBody, platform: Phaser.Physics.Arcade.StaticGroup) {
+  public bulletHitPlatform(bullet: Phaser.Types.Physics.Arcade.GameObjectWithBody, platform: Phaser.Types.Physics.Arcade.GameObjectWithBody) {
     (bullet as Phaser.Physics.Arcade.Image).disableBody(true, true);
   }
 
@@ -133,24 +133,7 @@ class Demo extends Scene {
     if (this.gameOver) {
       return;
     }
-    if (this.cursors.left.isDown) {
-      player.setVelocityX(-200);
-      player.anims.play('left', true);
-    } else if (this.cursors.right.isDown) {
-      player.setVelocityX(200);
-      player.anims.play('right', true);
-    } else {
-      player.setVelocityX(0);
-      player.anims.play('turn');
-    }
-    if (this.cursors.up.isDown && player.body.touching.down) {
-      player.setVelocityY(-360);
-    }
-    if (this.cursors.down.isDown) {
-      player.setGravity(DEFAULT_GRAVITY * 2);
-    } else {
-      player.setGravity(0);
-    }
+    this.playerGenerator?.onKeyInput(this.cursors);
   }
 }
 
