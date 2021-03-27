@@ -72,6 +72,10 @@ class Demo extends Scene {
     (bomb as Phaser.Physics.Arcade.Image).disableBody(true, true);
   }
 
+  public bulletHitPlatform(bullet: Phaser.Types.Physics.Arcade.GameObjectWithBody, platform: Phaser.Physics.Arcade.StaticGroup) {
+    (bullet as Phaser.Physics.Arcade.Image).disableBody(true, true);
+  }
+
   createPlatforms() {
     const platforms = this.physics.add.staticGroup();
     platforms.create(400, 568, GROUND_KEY).setScale(2).refreshBody();
@@ -110,6 +114,7 @@ class Demo extends Scene {
     this.physics.add.overlap(player, stars, this.collectStar, undefined, this);
     this.physics.add.collider(player, bombs, this.playerHitBomb, undefined, this);
     this.physics.add.collider(bullets, bombs, this.bulletHitBomb, undefined, this);
+    this.physics.add.collider(bullets, platforms, this.bulletHitPlatform, undefined, this);
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.cursors.space.onDown = () => {
