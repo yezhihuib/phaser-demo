@@ -7,21 +7,24 @@ import BombGenerator from "@/pages/gameMain/ui/bombGenerator";
 import {
   BOMB_KEY,
   BULLET_KEY,
-  DEFAULT_GRAVITY,
+  DEFAULT_GRAVITY, DUCK_KEY,
+  DUDE_KEY,
   GAME_HEIGHT,
   GAME_WIDTH,
   GROUND_KEY,
-  STAR_KEY
+  STAR_KEY,
+  TIGER_KEY
 } from "@/pages/gameMain/constant/constant";
 import StarGenerator from "@/pages/gameMain/ui/starGenerator";
-import PlayerGenerator from "@/pages/gameMain/ui/playerGenerator";
 import BulletGenerator from "@/pages/gameMain/ui/bulletGenerator";
+import PlayerTigerGenerator from "@/pages/gameMain/ui/playerTigerGenerator";
+import DuckGenerator from "@/pages/gameMain/ui/duckGenerator";
 
 class Demo extends Scene {
   width: number;
   height: number;
-  playerGenerator?: PlayerGenerator;
-  starGenerator?: StarGenerator;
+  playerGenerator?: PlayerTigerGenerator;
+  starGenerator?: DuckGenerator;
   bombGenerator?: BombGenerator;
   bulletGenerator?: BulletGenerator;
   cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -39,11 +42,17 @@ class Demo extends Scene {
     this.load.image('sky', 'https://img.alicdn.com/imgextra/i2/57145161/O1CN01HDz0gO1nzmlLuq9Ba_!!57145161.png');
     this.load.image(GROUND_KEY, 'https://img.alicdn.com/imgextra/i2/57145161/O1CN01WzzR4B1nzmlNygRyv_!!57145161.png');
     this.load.image(STAR_KEY, 'https://img.alicdn.com/imgextra/i2/57145161/O1CN01O4i54u1nzmlFI0G27_!!57145161.png');
+    this.load.image(STAR_KEY, 'https://img.alicdn.com/imgextra/i2/57145161/O1CN01O4i54u1nzmlFI0G27_!!57145161.png');
     this.load.image(BOMB_KEY, 'https://img.alicdn.com/imgextra/i1/57145161/O1CN013xlIg11nzmlNSqcq5_!!57145161.png');
     this.load.image(BULLET_KEY, 'https://img.alicdn.com/imgextra/i4/57145161/O1CN011quuRi1nzmlX97d2V_!!57145161.png');
-    this.load.spritesheet('dude',
+    this.load.image(DUCK_KEY, 'https://img.alicdn.com/imgextra/i3/57145161/O1CN01jgYJwN1nzmlSX0945_!!57145161.png');
+    this.load.spritesheet(DUDE_KEY,
       'https://img.alicdn.com/imgextra/i2/57145161/O1CN01cgRJ3b1nzmlKUSMa9_!!57145161.png',
       {frameWidth: 32, frameHeight: 48}
+    );
+    this.load.spritesheet(TIGER_KEY,
+      'https://img.alicdn.com/imgextra/i4/57145161/O1CN01hglrF31nzmlWTwuOX_!!57145161.png',
+      {frameWidth: 56, frameHeight: 36, spacing: 40}
     );
   }
 
@@ -95,9 +104,9 @@ class Demo extends Scene {
   public create() {// 生命周期
     this.add.image(0, 0, 'sky').setOrigin(0, 0);
     const platforms = this.createPlatforms();
-    this.playerGenerator = new PlayerGenerator(this);
+    this.playerGenerator = new PlayerTigerGenerator(this);
     const player = this.playerGenerator.getPlayer();
-    this.starGenerator = new StarGenerator(this);
+    this.starGenerator = new DuckGenerator(this);
     this.starGenerator.generate(11);
     const stars = this.starGenerator.getGroup();
 
