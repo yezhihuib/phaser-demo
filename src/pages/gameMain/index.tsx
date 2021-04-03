@@ -7,23 +7,24 @@ import BombGenerator from "@/pages/gameMain/ui/bombGenerator";
 import {
   BOMB_KEY,
   BULLET_KEY,
-  DEFAULT_GRAVITY, DUCK_KEY,
+  DEFAULT_GRAVITY,
+  DUCK_KEY,
   DUDE_KEY,
   GAME_HEIGHT,
   GAME_WIDTH,
   GROUND_KEY,
+  PANDA_KEY,
   STAR_KEY,
   TIGER_KEY
 } from "@/pages/gameMain/constant/constant";
-import StarGenerator from "@/pages/gameMain/ui/starGenerator";
 import BulletGenerator from "@/pages/gameMain/ui/bulletGenerator";
-import PlayerTigerGenerator from "@/pages/gameMain/ui/playerTigerGenerator";
 import DuckGenerator from "@/pages/gameMain/ui/duckGenerator";
+import PlayerPandaGenerator from "@/pages/gameMain/ui/playerPandaGenerator";
 
 class Demo extends Scene {
   width: number;
   height: number;
-  playerGenerator?: PlayerTigerGenerator;
+  playerGenerator?: PlayerPandaGenerator;
   starGenerator?: DuckGenerator;
   bombGenerator?: BombGenerator;
   bulletGenerator?: BulletGenerator;
@@ -54,6 +55,11 @@ class Demo extends Scene {
       'https://img.alicdn.com/imgextra/i4/57145161/O1CN01hglrF31nzmlWTwuOX_!!57145161.png',
       {frameWidth: 56, frameHeight: 36, spacing: 40}
     );
+    this.load.atlas(PANDA_KEY,
+      "https://bruce-public-bucket.oss-cn-hangzhou.aliyuncs.com/game/pic/panda/panda.png",
+      "https://bruce-public-bucket.oss-cn-hangzhou.aliyuncs.com/game/pic/panda/panda.json"
+    )
+
   }
 
   public collectStar(player: Phaser.Types.Physics.Arcade.GameObjectWithBody, star: Phaser.Types.Physics.Arcade.GameObjectWithBody) {
@@ -63,7 +69,7 @@ class Demo extends Scene {
     const stars = this.starGenerator?.getGroup();
     if (stars?.countActive(true) === 0) {
       this.starGenerator?.generate(Phaser.Math.Between(3, 9));
-      this.bombGenerator?.generateBombs(physicsPlayer, Phaser.Math.Between(1, 4));
+      // this.bombGenerator?.generateBombs(physicsPlayer, Phaser.Math.Between(1, 4));
     }
   }
 
@@ -104,7 +110,7 @@ class Demo extends Scene {
   public create() {// 生命周期
     this.add.image(0, 0, 'sky').setOrigin(0, 0);
     const platforms = this.createPlatforms();
-    this.playerGenerator = new PlayerTigerGenerator(this);
+    this.playerGenerator = new PlayerPandaGenerator(this);
     const player = this.playerGenerator.getPlayer();
     this.starGenerator = new DuckGenerator(this);
     this.starGenerator.generate(11);
@@ -129,6 +135,9 @@ class Demo extends Scene {
     this.cursors.space.onDown = () => {
       this.bulletGenerator?.createBullets(player, 5);
     }
+
+
+    console.log(this.textures.get(PANDA_KEY))
   }
 
   public update() {
