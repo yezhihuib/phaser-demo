@@ -8,13 +8,15 @@ enum Direction {
 class PlayerPandaGenerator {
   private scene: Phaser.Scene;
   private player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-  private direction: Direction;
+  private faceDirection: Direction;
 
   constructor(scene: Phaser.Scene) {
-    this.direction = Direction.LEFT;
+    this.faceDirection = Direction.LEFT;
     this.scene = scene;
     this.player = this.scene.physics.add.sprite(100, 450, PANDA_KEY);
+    this.player.setOriginFromFrame();
     this.player.setBounce(0.2);
+    this.player.body.syncBounds = true;
     this.player.setCollideWorldBounds(true);
     this.attachAnimation();
   }
@@ -48,16 +50,17 @@ class PlayerPandaGenerator {
     });
 
     scene.anims.create({
-      key: 'jump-left',
-      frames: scene.anims.generateFrameNames(PANDA_KEY, {start: 1, end: 3, prefix: "jump_l_", suffix: ".png"}),
+      key: 'jump-air-left',
+      frames: [{key: PANDA_KEY, frame: "jump_l_2.png"}],
       frameRate: 20
     });
 
     scene.anims.create({
-      key: 'jump-right',
-      frames: scene.anims.generateFrameNames(PANDA_KEY, {start: 1, end: 3, prefix: "jump_r_", suffix: ".png"}),
+      key: 'jump-air-right',
+      frames: [{key: PANDA_KEY, frame: "jump_r_2.png"}],
       frameRate: 20
     });
+
   }
 
   public getPlayer() {
@@ -66,21 +69,36 @@ class PlayerPandaGenerator {
 
   onKeyInput(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
     const {player} = this;
-
     if (cursors.left.isDown) {
       player.setVelocityX(-200);
-      player.anims.play("left", true);
-      this.direction = Direction.LEFT;
+      if (player.body.touching.down) {
+        player.anims.play("left", true);
+      } else {
+        player.anims.play("jump-air-left", true);
+      }
+      this.faceDirection = Direction.LEFT;
     } else if (cursors.right.isDown) {
       player.setVelocityX(200);
-      player.anims.play("right", true);
-      this.direction = Direction.RIGHT;
+      if (player.body.touching.down) {
+        player.anims.play("right", true);
+      } else {
+        player.anims.play("jump-air-right", true);
+      }
+      this.faceDirection = Direction.RIGHT;
     } else {
       player.setVelocityX(0);
-      if (this.direction === Direction.LEFT) {
-        player.anims.play('turn-left');
+      if (this.faceDirection === Direction.LEFT) {
+        if (player.body.touching.down) {
+          player.anims.play('turn-left');
+        } else {
+          player.anims.play("jump-air-left", true);
+        }
       } else {
-        player.anims.play('turn-right');
+        if (player.body.touching.down) {
+          player.anims.play('turn-right');
+        } else {
+          player.anims.play("jump-air-right", true);
+        }
       }
     }
     if (cursors.up.isDown && player.body.touching.down) {
