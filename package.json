@@ -59,6 +59,7 @@
     "moment": "^2.25.3",
     "omit.js": "^2.0.2",
     "phaser": "^3.53.1",
+    "pixi.js": "^6.0.4",
     "qs": "^6.9.0",
     "react": "^17.0.0",
     "react-dev-inspector": "^1.1.1",

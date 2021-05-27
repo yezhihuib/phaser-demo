@@ -27,6 +27,7 @@ class DuckGenerator {
       imageChild.setBounceX(Phaser.Math.FloatBetween(0.8, 1));
       imageChild.setVelocity(Phaser.Math.Between(-200, 200), 20);
       imageChild.setCollideWorldBounds(true);
+      imageChild.setFrictionX(0.5);
     });
     return stars;
   }

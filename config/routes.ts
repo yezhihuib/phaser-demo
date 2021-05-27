@@ -28,6 +28,12 @@
     component: './GameMain',
   },
   {
+    path: '/pixijs',
+    name: 'pixijs',
+    icon: 'smile',
+    component: './PixiJsMain',
+  },
+  {
     path: '/admin',
     name: 'admin',
     icon: 'crown',
@@ -50,7 +56,7 @@
   },
   {
     path: '/',
-    redirect: '/game',
+    redirect: '/pixijs',
   },
   {
     component: './404',
